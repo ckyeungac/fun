@@ -16,6 +16,7 @@ import datetime
 import numpy as np
 from threading import Thread
 from math import sqrt
+import csv
 
 # used for ploting the candle plot
 from plotly import __version__
@@ -402,6 +403,29 @@ class Stock(object):
         plot(fig, 'stock plot')
 
 
+def save_trade_to_csv(trade_list):
+    today = datetime.date.today()
+    data_dir = './data'
+    filename = 'trades_{}{}{}.csv'.format(today.year, today.month, today.day)
+    filepath = os.path.join(data_dir, filename)
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+
+    with open(filepath, 'a') as f:
+        w = csv.writer(f)
+        w.writerows(
+                [
+                    (trade.time,
+                    trade.price,
+                    trade.change,
+                    trade.precentage_change,
+                    trade.single_volumn,
+                    trade.total_volumn)
+                    for trade in trade_list[::-1]
+                ]
+            )
+
+
 # In[14]:
 x = Stock()
 x.init_candle_value()
@@ -409,4 +433,5 @@ while True:
     trade_list = x.get_live_trade_data()
     x.update_plot_data(trade_list)
     x.get_candle_plot()
+    save_trade_to_csv(trade_list)
 
